@@ -7,7 +7,9 @@ use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
+use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
@@ -16,6 +18,9 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -84,7 +89,43 @@ class AppointmentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('doctor_id')
+                    ->label('Doctor')
+                    ->options(function () {
+                        return Doctor::query()
+                            ->with('user')
+                            ->get()
+                            ->pluck('user.name', 'id')
+                            ->filter(function ($name) {
+                                return !is_null($name);
+                            })
+                            ->toArray();
+                    }),
+
+
+                Filter::make('date')
+                    ->form([
+                        DatePicker::make('date')
+                            ->label('Date'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            !empty($data['date']),
+                            fn(Builder $query) => $query->whereDate('date', '=', Carbon::parse($data['date'])->format('Y-m-d'))
+                        );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if (!empty($data['date'])) {
+                            $selectedDate = Carbon::parse($data['date'])->toFormattedDateString();
+                            $indicators[] = Indicator::make('Appointment on ' . $selectedDate)
+                                ->removeField('date');
+                        }
+
+                        return $indicators;
+                    })
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
