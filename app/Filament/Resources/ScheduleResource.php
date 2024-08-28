@@ -16,6 +16,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -112,7 +113,16 @@ class ScheduleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('week_day')
+                    ->options([
+                        'sunday' => 'Sunday',
+                        'monday' => 'Monday',
+                        'tuesday' => 'Tuesday',
+                        'wednesday' => 'Wednesday',
+                        'thursday' => 'Thursday',
+                        'friday' => 'Friday',
+                        'saturday' => 'Saturday',
+                    ])->indicator('Days'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

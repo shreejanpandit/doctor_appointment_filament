@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -79,7 +80,14 @@ class PatientResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                SelectFilter::make('gender')
+                    ->options([
+                        'male' => 'Male',
+                        'female' => 'Female',
+                        'other' => 'Other',
+                    ])->indicator('Gender'),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
