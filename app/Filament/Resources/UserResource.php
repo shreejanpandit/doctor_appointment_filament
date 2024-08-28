@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -104,6 +105,13 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'patient' => 'Patient',
+                        'doctor' => 'Doctor',
+                    ])->indicator('Role'),
+
                 Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from'),
@@ -120,24 +128,8 @@ class UserResource extends Resource
                                 fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
-                Filter::make('role')
-                    ->form([
-                        Select::make('role')
-                            ->label('Role')
-                            ->options([
-                                'admin' => 'Admin',
-                                'patient' => 'Patient',
-                                'doctor' => 'Doctor',
-                            ])
-                            ->placeholder('Select a role')
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['role'],
-                                fn(Builder $query, $role): Builder => $query->where('role', $role),
-                            );
-                    }),
+
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
