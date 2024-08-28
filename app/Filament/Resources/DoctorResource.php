@@ -14,6 +14,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -116,7 +117,18 @@ class DoctorResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('department_id')
+                    ->label('Department')
+                    ->options(function () {
+                        return Doctor::query()
+                            ->with('department')
+                            ->get()
+                            ->pluck('department.name', 'department_id')
+                            ->filter(function ($name) {
+                                return !is_null($name);
+                            })
+                            ->toArray();
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
