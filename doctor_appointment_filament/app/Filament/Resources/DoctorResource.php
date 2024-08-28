@@ -7,7 +7,11 @@ use App\Filament\Resources\DoctorResource\RelationManagers;
 use App\Models\Doctor;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +22,53 @@ class DoctorResource extends Resource
     protected static ?string $model = Doctor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+
+                Section::make('Doctor Description')
+                    ->columns([
+                        'sm' => 1,
+                        'xl' => 2,
+                        '2xl' => 3,
+                    ])
+                    ->schema([
+                        TextEntry::make('user.name')->tooltip('Doctor Name')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->label('Name')
+                            ->icon('heroicon-m-user')
+                            ->fontFamily(FontFamily::Mono)
+                            ->iconColor('primary'),
+                        TextEntry::make('user.email')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->label('Email')
+                            ->icon('heroicon-m-envelope')
+                            ->iconColor('primary')
+                            ->tooltip('Email'),
+                        TextEntry::make('bio')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->label('BIO')
+                            ->markdown()
+                            ->icon('heroicon-m-identification')
+                            ->iconColor('primary')
+                            ->tooltip('Bio'),
+                        TextEntry::make('contact')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->label('Contact')
+                            ->markdown()
+                            ->icon('heroicon-m-phone')
+                            ->iconColor('primary'),
+                        TextEntry::make('department.name')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->label('Department')
+                            ->markdown()
+                            ->icon('heroicon-m-building-office')
+                            ->iconColor('primary')
+                    ])
+            ]);
+    }
 
     public static function form(Form $form): Form
     {
