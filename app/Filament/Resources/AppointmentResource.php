@@ -37,6 +37,7 @@ class AppointmentResource extends Resource
             ->schema([
                 Forms\Components\Select::make('patient_id')
                     ->label('Patient')
+                    ->hidden(fn() => auth()->user()->role === 'patient')
                     ->options(function () {
                         $patients = Patient::with('user')->get();
                         return $patients->pluck('user.name', 'id')->filter(function ($name) {

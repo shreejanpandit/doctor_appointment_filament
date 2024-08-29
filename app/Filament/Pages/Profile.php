@@ -29,7 +29,7 @@ class Profile extends Page implements HasForms
 
     public function mount(): void
     {
-        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id)->toArray();
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id())->toArray();
         $this->form->fill();
         $this->form->fill($user);
     }
@@ -47,7 +47,7 @@ class Profile extends Page implements HasForms
         ];
 
         if ($user->role === 'doctor') {
-            $schema = array_merge($schema, [
+            $schema = [...$schema, ...[
                 Select::make('doctor.department_id')
                     ->label('Department')
                     ->relationship('doctor.department', 'name')
@@ -63,9 +63,9 @@ class Profile extends Page implements HasForms
                     ->default($user->doctor->image ?? '')
                     ->disk('public')
                     ->directory('profile_images'),
-            ]);
+            ]];
         } elseif ($user->role === 'patient') {
-            $schema = array_merge($schema, [
+            $schema = [...$schema, ...[
                 DatePicker::make('patient.dob')
                     ->required()
                     ->default($user->patient->dob ?? ''),
@@ -86,7 +86,7 @@ class Profile extends Page implements HasForms
                     ->default($user->patient->image ?? '')
                     ->disk('public')
                     ->directory('profile_images'),
-            ]);
+            ]];
         }
 
         return $form
@@ -100,13 +100,13 @@ class Profile extends Page implements HasForms
         return [
             Action::make('Update')
                 ->color('primary')
-                ->submit('Update'),
+                ->label('Update'),
         ];
     }
 
     public function update(): void
     {
-        $user = auth()->user();
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id());
 
         if (!$user) {
             Notification::make()
@@ -124,27 +124,29 @@ class Profile extends Page implements HasForms
         ]);
 
         if ($user->role === 'doctor') {
-            $doctor = $user->doctor;
-
-            if ($doctor) {
-                $doctor->update([
-                    'department_id' => $formState['department_id'] ?? $doctor->department_id,
-                    'contact' => $formState['contact'] ?? $doctor->contact,
-                    'bio' => $formState['bio'] ?? $doctor->bio,
-                    'image' => $formState['image'] ?? $doctor->image,
-                ]);
-            }
+            $user->doctor()->updateOrCreate(
+                [
+                    'user_id' => $user->id
+                ],
+                [
+                    'department_id' => $formState['doctor']['department_id'],
+                    'contact' => $formState['doctor']['contact'],
+                    'bio' => $formState['doctor']['bio'],
+                    'image' => $formState['doctor']['image'],
+                ]
+            );
         } elseif ($user->role === 'patient') {
-            $patient = $user->patient;
-
-            if ($patient) {
-                $patient->update([
-                    'dob' => $formState['dob'] ?? $patient->dob,
-                    'age' => $formState['age'] ?? $patient->age,
-                    'gender' => $formState['gender'] ?? $patient->gender,
-                    'image' => $formState['image'] ?? $patient->image,
-                ]);
-            }
+            $user->patient()->updateOrCreate(
+                [
+                    'user_id' => $user->id
+                ],
+                [
+                    'dob' => $formState['patient']['dob'],
+                    'age' => $formState['patient']['age'],
+                    'gender' => $formState['patient']['gender'],
+                    'image' => $formState['patient']['image'],
+                ]
+            );
         }
 
         Notification::make()
