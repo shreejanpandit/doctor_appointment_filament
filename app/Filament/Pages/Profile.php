@@ -17,6 +17,7 @@ use Filament\Pages\Page;
 class Profile extends Page implements HasForms
 {
     use InteractsWithForms;
+    protected static ?string $model = User::class;
 
     public ?array $data = [];
     protected static string $view = 'filament.pages.profile';
@@ -26,64 +27,63 @@ class Profile extends Page implements HasForms
         return false;
     }
 
+    public function mount(): void
+    {
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id)->toArray();
+        $this->form->fill();
+        $this->form->fill($user);
+    }
+
     public function form(Form $form): Form
     {
         $user = auth()->user();
 
-        if (!$user) {
-            // Handle the case where no user is authenticated
-            return $form->schema([]);
-        }
-
         $schema = [
             TextInput::make('name')
                 ->autofocus()
-                ->required()
-                ->default($user->name),
+                ->required(),
             TextInput::make('email')
-                ->required()
-                ->default($user->email),
+                ->required(),
         ];
 
         if ($user->role === 'doctor') {
             $schema = array_merge($schema, [
-                Select::make('department_id')
+                Select::make('doctor.department_id')
                     ->label('Department')
                     ->relationship('doctor.department', 'name')
+                    ->required(),
+                TextInput::make('doctor.contact')
                     ->required()
-                    ->default($user->doctor ? $user->doctor->department_id : null),
-                TextInput::make('contact')
+                    ->default($user->doctor->contact ?? ''),
+                TextInput::make('doctor.bio')
                     ->required()
-                    ->default($user->doctor ? $user->doctor->contact : ''),
-                TextInput::make('bio')
-                    ->required()
-                    ->default($user->doctor ? $user->doctor->bio : ''),
-                FileUpload::make('image')
+                    ->default($user->doctor->bio ?? ''),
+                FileUpload::make('doctor.image')
                     ->image()
-                    ->default($user->doctor ? $user->doctor->image : '')
-                    ->disk('public') // Ensure this matches your filesystem disk
-                    ->directory('profile_images'), // Ensure this is correct
+                    ->default($user->doctor->image ?? '')
+                    ->disk('public')
+                    ->directory('profile_images'),
             ]);
         } elseif ($user->role === 'patient') {
             $schema = array_merge($schema, [
-                DatePicker::make('dob')
+                DatePicker::make('patient.dob')
                     ->required()
-                    ->default($user->patient ? $user->patient->dob : ''),
-                TextInput::make('age')
+                    ->default($user->patient->dob ?? ''),
+                TextInput::make('patient.age')
                     ->required()
                     ->numeric()
-                    ->default($user->patient ? $user->patient->age : ''),
-                Select::make('gender')
+                    ->default($user->patient->age ?? ''),
+                Select::make('patient.gender')
                     ->options([
                         'male' => 'Male',
                         'female' => 'Female',
                         'other' => 'Other',
                     ])
                     ->required()
-                    ->default($user->patient ? $user->patient->gender : ''),
-                FileUpload::make('image')
+                    ->default($user->patient->gender ?? ''),
+                FileUpload::make('patient.image')
                     ->image()
-                    ->default($user->patient ? $user->patient->image : '')
+                    ->default($user->patient->image ?? '')
                     ->disk('public')
                     ->directory('profile_images'),
             ]);

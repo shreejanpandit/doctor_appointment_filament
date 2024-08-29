@@ -51,7 +51,7 @@ class AppointmentPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Appointment $appointment): bool
+    public function restore(User $user, Appointment $appointment)
     {
         //
     }
@@ -59,7 +59,7 @@ class AppointmentPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Appointment $appointment): bool
+    public function forceDelete(User $user, Appointment $appointment)
     {
         //
     }
