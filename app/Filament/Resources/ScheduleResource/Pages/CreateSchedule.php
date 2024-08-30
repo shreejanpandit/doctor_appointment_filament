@@ -15,6 +15,7 @@ class CreateSchedule extends CreateRecord
         if (empty($data['doctor_id'])) {
             $data['doctor_id'] = auth()->user()->doctor->id;
         }
+
         return $data;
     }
 }

@@ -20,6 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Unique;
 
 class ScheduleResource extends Resource
 {
@@ -38,12 +39,6 @@ class ScheduleResource extends Resource
                         '2xl' => 3,
                     ])
                     ->schema([
-                        TextEntry::make('doctor.user.name')
-                            ->label('Doctor')
-                            ->tooltip('Name of the Doctor assigned to this schedule')
-                            ->icon('heroicon-m-user')
-                            ->fontFamily(FontFamily::Mono)
-                            ->iconColor('primary'),
                         TextEntry::make('week_day')
                             ->label('Week Day')
                             ->icon('heroicon-m-calendar')
@@ -75,6 +70,9 @@ class ScheduleResource extends Resource
                     })
                     ->required(),
                 Select::make('week_day')
+                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                        return $rule->where('doctor_id', auth()->user()->doctor->id);
+                    })
                     ->options([
                         'sunday' => 'Sunday',
                         'monday' => 'Monday',
@@ -108,10 +106,10 @@ class ScheduleResource extends Resource
                 }
             })
             ->columns([
-                Tables\Columns\TextColumn::make('doctor.user.name')
-                    ->label('Dr Name')
-                    ->numeric()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('doctor.user.name')
+                //     ->label('Dr Name')
+                //     ->numeric()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('week_day')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_time'),

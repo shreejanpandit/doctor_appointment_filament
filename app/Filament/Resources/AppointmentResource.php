@@ -172,8 +172,8 @@ class AppointmentResource extends Resource
                         $record->date = $data['date'];
                         $record->save();
                     })
-                    ->icon('heroicon-m-user')
-                    ->color('primary')
+                    ->icon('heroicon-m-clock')
+                    ->color('success')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
