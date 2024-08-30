@@ -29,7 +29,7 @@ class Profile extends Page implements HasForms
 
     public function mount(): void
     {
-        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id())->toArray();
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id)->toArray();
         $this->form->fill();
         $this->form->fill($user);
     }
@@ -47,7 +47,7 @@ class Profile extends Page implements HasForms
         ];
 
         if ($user->role === 'doctor') {
-            $schema = [...$schema, ...[
+            $schema = array_merge($schema, [
                 Select::make('doctor.department_id')
                     ->label('Department')
                     ->relationship('doctor.department', 'name')
@@ -63,9 +63,9 @@ class Profile extends Page implements HasForms
                     ->default($user->doctor->image ?? '')
                     ->disk('public')
                     ->directory('profile_images'),
-            ]];
+            ]);
         } elseif ($user->role === 'patient') {
-            $schema = [...$schema, ...[
+            $schema = array_merge($schema, [
                 DatePicker::make('patient.dob')
                     ->required()
                     ->default($user->patient->dob ?? ''),
@@ -86,7 +86,7 @@ class Profile extends Page implements HasForms
                     ->default($user->patient->image ?? '')
                     ->disk('public')
                     ->directory('profile_images'),
-            ]];
+            ]);
         }
 
         return $form
@@ -100,13 +100,13 @@ class Profile extends Page implements HasForms
         return [
             Action::make('Update')
                 ->color('primary')
-                ->label('Update'),
+                ->submit('Update'),
         ];
     }
 
     public function update(): void
     {
-        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id());
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id);
 
         if (!$user) {
             Notification::make()

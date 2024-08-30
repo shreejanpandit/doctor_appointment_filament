@@ -62,9 +62,29 @@ class AppointmentResource extends Resource
             ]);
     }
 
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     return parent::getEloquentQuery()->where('user_id', auth()->id());
+    // }
+
     public static function table(Table $table): Table
     {
+        $userId = auth()->user()->id;
         return $table
+            ->modifyQueryUsing(function (Builder $query) use ($userId) {
+                if (auth()->user()->role === 'admin') {
+                    return;
+                } elseif (auth()->user()->role === 'patient') {
+                    $query->whereHas('patient', function (Builder $query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    });
+                } elseif (auth()->user()->role === 'doctor') {
+
+                    $query->whereHas('doctor', function (Builder $query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    });
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('patient.user.name')
                     ->label('Patient')

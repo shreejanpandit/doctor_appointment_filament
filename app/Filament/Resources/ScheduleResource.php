@@ -66,6 +66,7 @@ class ScheduleResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('doctor_id')
+                    ->hidden(fn() => auth()->user()->role === 'doctor')
                     ->options(function () {
                         $doctors = Doctor::with('user')->get();
                         return $doctors->pluck('user.name', 'id')->filter(function ($name) {
@@ -93,7 +94,19 @@ class ScheduleResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $userId = auth()->user()->id;
         return $table
+            ->modifyQueryUsing(function (Builder $query) use ($userId) {
+                if (auth()->user()->role === 'admin') {
+                    return;
+                }
+                if (auth()->user()->role === 'doctor') {
+
+                    $query->whereHas('doctor', function (Builder $query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    });
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('doctor.user.name')
                     ->label('Dr Name')

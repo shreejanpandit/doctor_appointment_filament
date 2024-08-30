@@ -21,6 +21,9 @@ class AppointmentPolicy
      */
     public function view(User $user, Appointment $appointment): bool
     {
+        if ($user->role === 'patient') {
+            return $user->patient->id === $appointment->patient_id;
+        }
         return $user->role === 'admin' || $user->role === 'patient' || $user->role === 'doctor';
     }
 
@@ -29,7 +32,10 @@ class AppointmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'admin' || $user->role === 'patient';
+        if ($user->role === 'patient') {
+            return !empty($user->patient->id);
+        }
+        return $user->role === 'admin';
     }
 
     /**
