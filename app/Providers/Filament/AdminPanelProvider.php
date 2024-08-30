@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\Profile;
 use App\Filament\Resources\UserResource\Pages\Auth\Register;
 use Filament\Http\Middleware\Authenticate;
@@ -38,6 +39,8 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn(): string => Profile::getUrl())
                     ->icon('heroicon-o-user'),
             ])
+            ->font('Poppins')
+            ->brandName('Doctor Appointment')
             ->colors([
                 'primary' => Color::Violet,
             ])
@@ -45,6 +48,8 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                Dashboard::class,
+
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

@@ -29,7 +29,10 @@ class SchedulePolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'admin'  || $user->role === 'doctor';
+        if ($user->role === 'doctor') {
+            return !empty($user->doctor->id);
+        }
+        return $user->role === 'admin';
     }
 
     /**

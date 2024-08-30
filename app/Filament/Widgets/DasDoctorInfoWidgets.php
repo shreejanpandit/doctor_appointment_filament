@@ -3,18 +3,46 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Doctor;
+use App\Models\Appointment;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DasDoctorInfoWidgets extends BaseWidget
 {
+    protected static string $routePath = 'doctor';
     protected function getStats(): array
     {
+        $doctorId = auth()->user()->doctor->id ?? '';
+
+        $today = Carbon::today();
+
+
+        $todayAppointments = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('date', $today)
+            ->count();
+        $upcomingAppointments = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('date', '>', $today)
+            ->count();
+        $previousAppointments = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('date', '<', $today)
+            ->count();
+
         return [
-            Stat::make('Doctor', Doctor::count())
-                ->description('Total doctor')
-                ->chart([0, 30, 60, 65, 70, 80, 90])
-                ->color('rand'),
+            Stat::make('Appointments Today', $todayAppointments)
+                ->description('Appointments scheduled for today')
+                ->color('success')
+                ->chart([0, $todayAppointments]),
+
+            Stat::make('Upcoming Appointments', $upcomingAppointments)
+                ->description('Appointments scheduled in the future')
+                ->color('warning')
+                ->chart([0, $upcomingAppointments]),
+
+            Stat::make('Previous Appointments', $previousAppointments)
+                ->description('Appointments that have already passed')
+                ->color('danger')
+                ->chart([0, $previousAppointments]),
         ];
     }
 
