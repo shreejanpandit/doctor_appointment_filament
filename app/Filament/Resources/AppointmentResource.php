@@ -47,6 +47,7 @@ class AppointmentResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('doctor_id')
                     ->label('Doctor')
+                    ->hiddenOn('edit')
                     ->options(function () {
                         $doctors = Doctor::with('user')->get();
                         return $doctors->pluck('user.name', 'id')->filter(function ($name) {
@@ -55,8 +56,10 @@ class AppointmentResource extends Resource
                     })
                     ->required(),
                 Forms\Components\DatePicker::make('date')
+                    ->hiddenOn('edit')
                     ->required(),
                 TimePicker::make('time')
+                    ->hiddenOn('edit')
                     ->required(),
                 Forms\Components\Textarea::make('description'),
             ]);

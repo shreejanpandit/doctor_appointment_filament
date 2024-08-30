@@ -29,7 +29,7 @@ class Profile extends Page implements HasForms
 
     public function mount(): void
     {
-        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id)->toArray();
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id())->toArray();
         $this->form->fill();
         $this->form->fill($user);
     }
@@ -106,7 +106,7 @@ class Profile extends Page implements HasForms
 
     public function update(): void
     {
-        $user = User::query()->with(['doctor', 'patient'])->find(auth()->user()->id);
+        $user = User::query()->with(['doctor', 'patient'])->find(auth()->id());
 
         if (!$user) {
             Notification::make()
