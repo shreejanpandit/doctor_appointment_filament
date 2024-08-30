@@ -8,8 +8,10 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
@@ -92,9 +94,11 @@ class AppointmentResource extends Resource
                 Tables\Columns\TextColumn::make('patient.user.name')
                     ->label('Patient')
                     ->numeric()
+                    ->hidden(fn() => auth()->user()->role === 'patient')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('doctor.user.name')
                     ->label('Doctor')
+                    ->hidden(fn() => auth()->user()->role === 'doctor')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
@@ -154,6 +158,22 @@ class AppointmentResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('Reshedule')
+                    ->visible(fn($record) => auth()->user()->role === 'doctor')
+                    ->form(function ($record) {
+                        return [
+                            DatePicker::make('date')
+                                ->default($record->date)
+                                ->native(false)
+                        ];
+                    })
+                    ->action(function ($record, $data) {
+                        $record->date = $data['date'];
+                        $record->save();
+                    })
+                    ->icon('heroicon-m-user')
+                    ->color('primary')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
