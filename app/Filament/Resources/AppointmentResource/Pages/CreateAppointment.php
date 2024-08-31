@@ -15,6 +15,9 @@ class CreateAppointment extends CreateRecord
         if (empty($data['patient_id'])) {
             $data['patient_id'] = auth()->user()->patient->id;
         }
+
+        unset($data['department_id']);
+
         return $data;
     }
 }

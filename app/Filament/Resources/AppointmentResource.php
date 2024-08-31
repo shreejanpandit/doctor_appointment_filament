@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AppointmentResource\Pages;
 use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Models\Appointment;
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Patient;
 use Carbon\Carbon;
@@ -47,15 +48,25 @@ class AppointmentResource extends Resource
                         })->toArray();
                     })
                     ->required(),
-                Forms\Components\Select::make('doctor_id')
-                    ->label('Doctor')
+                Forms\Components\Select::make('department_id')
+                    ->label('Department')
                     ->hiddenOn('edit')
                     ->options(function () {
-                        $doctors = Doctor::with('user')->get();
-                        return $doctors->pluck('user.name', 'id')->filter(function ($name) {
+                        $departments = Department::with('doctors')->get();
+                        return $departments->pluck('name', 'id')->filter(function ($name) {
                             return !is_null($name);
                         })->toArray();
                     })
+                    ->live()
+                    ->required(),
+                Forms\Components\Select::make('doctor_id')
+                    ->label('Doctor')
+                    ->hiddenOn('edit')
+                    ->options(function (Forms\Get $get) {
+                        $doctors = Doctor::with('user')->get();
+                        return $doctors->where('department_id', $get('department_id'))->pluck('user.name', 'id')->toArray();
+                    })
+                    ->disabled(fn(Forms\Get $get): bool => !filled($get('department_id')))
                     ->required(),
                 Forms\Components\DatePicker::make('date')
                     ->hiddenOn('edit')
