@@ -30,7 +30,9 @@ class Profile extends Page implements HasForms
     public function mount(): void
     {
         $user = User::query()->with(['doctor', 'patient'])->find(auth()->id())->toArray();
+        // @phpstan-ignore-next-line
         $this->form->fill();
+        // @phpstan-ignore-next-line
         $this->form->fill($user);
     }
 
@@ -115,7 +117,7 @@ class Profile extends Page implements HasForms
                 ->send();
             return;
         }
-
+        // @phpstan-ignore-next-line
         $formState = $this->form->getState();
 
         $user->update([
@@ -124,6 +126,7 @@ class Profile extends Page implements HasForms
         ]);
 
         if ($user->role === 'doctor') {
+            // @phpstan-ignore-next-line
             $user->doctor()->updateOrCreate(
                 [
                     'user_id' => $user->id
@@ -136,6 +139,7 @@ class Profile extends Page implements HasForms
                 ]
             );
         } elseif ($user->role === 'patient') {
+            // @phpstan-ignore-next-line
             $user->patient()->updateOrCreate(
                 [
                     'user_id' => $user->id

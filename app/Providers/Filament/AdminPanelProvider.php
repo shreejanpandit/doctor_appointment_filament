@@ -38,16 +38,19 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Profile')
                     ->url(fn(): string => Profile::getUrl())
                     ->icon('heroicon-o-user'),
+                'logout' => MenuItem::make()->label('Log Out')
             ])
             ->font('Poppins')
-            ->brandName('Doctor Appointment')
+            ->brandLogo(asset('images/logo1.svg'))
+            ->favicon('images/favicon.ico')
+            ->breadcrumbs(false)
             ->colors([
                 'primary' => Color::Violet,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class, 
+                Pages\Dashboard::class,
                 Dashboard::class,
 
             ])

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Appointment extends Model
 {
@@ -13,12 +14,12 @@ class Appointment extends Model
         'date' => 'datetime',
     ];
 
-    public function doctor()
+    public function doctor(): Relation
     {
         return $this->belongsTo(Doctor::class);
     }
 
-    public function patient()
+    public function patient(): Relation
     {
         return $this->belongsTo(Patient::class);
     }

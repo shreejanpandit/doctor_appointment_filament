@@ -21,7 +21,7 @@ class SchedulePolicy
      */
     public function view(User $user, Schedule $schedule): bool
     {
-        return $user->role === 'admin'  || $user->role === 'doctor' || $user->role === 'patient';
+        return true;
     }
 
     /**
@@ -56,7 +56,7 @@ class SchedulePolicy
      */
     public function restore(User $user, Schedule $schedule): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -64,6 +64,6 @@ class SchedulePolicy
      */
     public function forceDelete(User $user, Schedule $schedule): bool
     {
-        //
+        return false;
     }
 }

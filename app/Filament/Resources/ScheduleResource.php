@@ -26,7 +26,7 @@ class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
 
     public static function infolist(Infolist $infolist): Infolist
     {
@@ -70,7 +70,7 @@ class ScheduleResource extends Resource
                     })
                     ->required(),
                 Select::make('week_day')
-                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                    ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
                         return $rule->where('doctor_id', auth()->user()->doctor->id);
                     })
                     ->options([
@@ -106,10 +106,6 @@ class ScheduleResource extends Resource
                 }
             })
             ->columns([
-                // Tables\Columns\TextColumn::make('doctor.user.name')
-                //     ->label('Dr Name')
-                //     ->numeric()
-                //     ->sortable(),
                 Tables\Columns\TextColumn::make('week_day')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_time'),

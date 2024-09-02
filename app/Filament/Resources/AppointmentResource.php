@@ -8,10 +8,12 @@ use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Schedule;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
@@ -27,12 +29,13 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class AppointmentResource extends Resource
 {
     protected static ?string $model = Appointment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-top-right-on-square';
 
     public static function form(Form $form): Form
     {
@@ -59,6 +62,7 @@ class AppointmentResource extends Resource
                     })
                     ->live()
                     ->required(),
+
                 Forms\Components\Select::make('doctor_id')
                     ->label('Doctor')
                     ->hiddenOn('edit')
@@ -67,16 +71,66 @@ class AppointmentResource extends Resource
                         return $doctors->where('department_id', $get('department_id'))->pluck('user.name', 'id')->toArray();
                     })
                     ->disabled(fn(Forms\Get $get): bool => !filled($get('department_id')))
+                    ->live()
                     ->required(),
+
+                Forms\Components\Textarea::make('description')
+                    ->columnSpanFull(),
+
                 Forms\Components\DatePicker::make('date')
                     ->hiddenOn('edit')
-                    ->required(),
-                TimePicker::make('time')
+                    ->required()
+                    ->columnSpanFull()
+                    ->helperText('Please select a date.'),
+                Placeholder::make('Weekly Schedule')
                     ->hiddenOn('edit')
-                    ->required(),
-                Forms\Components\Textarea::make('description'),
+                    ->content(fn(Forms\Get $get) => $get('doctor_id') ? new  HtmlString(self::getWeeklySchedule($get('doctor_id'))) : 'Select a doctor to view schedule'),
+
             ]);
     }
+
+    private static function getWeeklySchedule($doctorId)
+    {
+        $doctor_schedule = Schedule::query()
+            ->where('doctor_id', '=', $doctorId)
+            ->with('doctor')
+            ->get();
+
+        $weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+        $schedules = [];
+
+        foreach ($weekDays as $day) {
+            $daySchedule = $doctor_schedule->where('week_day', $day)->first();
+            $schedules[$day . '_start_time'] = $daySchedule
+                ? $daySchedule->start_time->format('h:i A') // Use 24-hour format
+                : 'Closed';
+            $schedules[$day . '_end_time'] = $daySchedule
+                ? $daySchedule->end_time->format('h:i A') // Use 24-hour format
+                : 'Closed';
+        }
+
+        // Format the schedule as an HTML table
+        $formatted = '<table style="width: 100%; border-collapse: collapse;">';
+        $formatted .= '<thead><tr><th style="border: 1px solid #ddd; padding: 8px;">Day</th><th style="border: 1px solid #ddd; padding: 8px;">Time</th></tr></thead>';
+        $formatted .= '<tbody>';
+
+        foreach ($weekDays as $day) {
+            $startTime = $schedules[$day . '_start_time'];
+            $endTime = $schedules[$day . '_end_time'];
+            $formatted .= '<tr>';
+            $formatted .= '<td style="border: 1px solid #ddd; padding: 8px;">' . ucfirst($day) . '</td>';
+            $formatted .= '<td style="border: 1px solid #ddd; padding: 8px;">' . $startTime . ' - ' . $endTime . '</td>';
+            $formatted .= '</tr>';
+        }
+
+        $formatted .= '</tbody></table>';
+
+        return $formatted;
+    }
+
+
+
 
     // public static function getEloquentQuery(): Builder
     // {

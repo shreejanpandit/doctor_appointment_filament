@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Schedule extends Model
 {
@@ -13,7 +14,7 @@ class Schedule extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
-    public function doctor()
+    public function doctor(): Relation
     {
         return $this->belongsTo(Doctor::class);
     }
