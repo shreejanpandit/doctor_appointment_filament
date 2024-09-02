@@ -32,7 +32,7 @@ class SchedulePolicy
         if ($user->role === 'doctor') {
             return !empty($user->doctor->id);
         }
-        return $user->role === 'admin';
+        return false;
     }
 
     /**

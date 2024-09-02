@@ -7,8 +7,10 @@ use App\Filament\Resources\AppointmentResource\RelationManagers;
 use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Doctor;
+use Filament\Notifications\Notification;
 use App\Models\Patient;
 use App\Models\Schedule;
+use App\Notifications\AppointmentRescheduled;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -20,6 +22,7 @@ use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
@@ -35,7 +38,7 @@ class AppointmentResource extends Resource
 {
     protected static ?string $model = Appointment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-top-right-on-square';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     public static function form(Form $form): Form
     {
@@ -235,6 +238,15 @@ class AppointmentResource extends Resource
                     })
                     ->action(function ($record, $data) {
                         $record->date = $data['date'];
+
+                        Notification::make()
+                            ->title('Appointment rescheduled')
+                            ->body("Your appointment scheduled for " . $record->date . " with " . $record->doctor->user->name . " has been rescheduled for " . $data['date'] .
+                                ". Sorry for this inconvinice caused. Please check the resceduled data and be in time. Thank You! for understanding. ")
+                            ->success()
+                            ->duration(10)
+                            ->sendToDatabase($record->patient->user);
+                        event(new DatabaseNotificationsSent($record->patient->user));
                         $record->save();
                     })
                     ->icon('heroicon-m-clock')
