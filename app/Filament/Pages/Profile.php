@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -70,6 +71,9 @@ class Profile extends Page implements HasForms
             $schema = array_merge($schema, [
                 DatePicker::make('patient.dob')
                     ->required()
+                    ->maxDate(Carbon::now()->toDateString())
+                    // ->beforeOrEqual(Carbon::now()->toDateString())
+                    // ->rules(['before_or_equal:' . Carbon::now()->toDateString()])
                     ->default($user->patient->dob ?? ''),
                 TextInput::make('patient.age')
                     ->required()

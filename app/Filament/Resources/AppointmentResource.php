@@ -81,6 +81,7 @@ class AppointmentResource extends Resource
                     ->columnSpanFull(),
 
                 Forms\Components\DatePicker::make('date')
+                    ->minDate(Carbon::now()->toDateString())
                     ->hiddenOn('edit')
                     ->required()
                     ->columnSpanFull()
@@ -232,22 +233,30 @@ class AppointmentResource extends Resource
                     ->form(function ($record) {
                         return [
                             DatePicker::make('date')
+                                ->minDate(Carbon::now()->toDateString())
                                 ->default($record->date)
                                 ->native(false)
                         ];
                     })
-                    ->action(function ($record, $data) {
-                        $record->date = $data['date'];
 
+                    ->action(function ($record, $data) {
+                        $previous_date = $record->date;
+                        $record->date = $data['date'];
+                        $record->save();
                         Notification::make()
-                            ->title('Appointment rescheduled')
-                            ->body("Your appointment scheduled for " . $record->date . " with " . $record->doctor->user->name . " has been rescheduled for " . $data['date'] .
-                                ". Sorry for this inconvinice caused. Please check the resceduled data and be in time. Thank You! for understanding. ")
                             ->success()
+                            ->title('Appointment rescheduled')
+                            ->body("Your appointment scheduled for " . $previous_date . " with " . $record->doctor->user->name . " has been rescheduled for " . $record->date .
+                                ". Sorry for this inconvenience caused. Please check the resceduled data and be in time. Thank You! for understanding. ")
                             ->duration(10)
                             ->sendToDatabase($record->patient->user);
                         event(new DatabaseNotificationsSent($record->patient->user));
-                        $record->save();
+
+                        Notification::make()
+                            ->title('Success')
+                            ->body('The appointment has been successfully rescheduled.')
+                            ->success()
+                            ->send();
                     })
                     ->icon('heroicon-m-clock')
                     ->color('success')

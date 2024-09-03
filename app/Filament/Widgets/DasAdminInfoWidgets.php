@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Appointment;
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Patient;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -23,6 +24,10 @@ class DasAdminInfoWidgets extends BaseWidget
                 ->color('rand'),
             Stat::make('Appointment', Appointment::count())
                 ->description('Total Appointment')
+                ->chart([0, 30, 60, 65, 70, 75, 80])
+                ->color('rand'),
+            Stat::make('Appointment', Department::count())
+                ->description('Total Department')
                 ->chart([0, 30, 60, 65, 70, 75, 80])
                 ->color('rand'),
         ];
