@@ -11,6 +11,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DasAdminInfoWidgets extends BaseWidget
 {
+    protected static ?int $sort = 0;
+
     protected function getStats(): array
     {
         return [

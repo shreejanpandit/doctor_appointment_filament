@@ -11,6 +11,8 @@ class Department extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['name'];
+
     /**
      * @return HasMany<Doctor>
      */

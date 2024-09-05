@@ -11,6 +11,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class DasDoctorInfoWidgets extends BaseWidget
 {
     protected static string $routePath = 'doctor';
+    protected static ?int $sort = 0;
     protected function getStats(): array
     {
         $doctorId = auth()->user()->doctor->id ?? '';

@@ -7,9 +7,10 @@ use Filament\Widgets\ChartWidget;
 
 class DasChartWidget extends ChartWidget
 {
+    protected static ?int $sort = 2;
+
     protected static ?string $heading = 'Department Doctor Count';
 
-    // Define a set of 20 static colors
     protected static array $colors = [
         'rgb(255, 99, 132)', // Red
         'rgb(54, 162, 235)', // Blue
@@ -57,7 +58,10 @@ class DasChartWidget extends ChartWidget
             ],
         ];
     }
-
+    public static function canView(): bool
+    {
+        return  auth()->user()->role === 'admin';
+    }
 
     protected function getType(): string
     {
